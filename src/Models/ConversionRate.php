@@ -17,7 +17,7 @@ class ConversionRate extends DataObject
 
     private static $db = [
         'Code'   => 'Varchar(3)',
-        'Dollar' => 'Decimal'
+        'Dollar' => 'Float'
     ];
 
     /**
@@ -55,4 +55,3 @@ class ConversionRate extends DataObject
         return static::get()->filter('Code', $code)->first();
     }
 }
-?>
