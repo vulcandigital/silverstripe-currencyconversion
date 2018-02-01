@@ -8,8 +8,8 @@ use SilverStripe\ORM\DataObject;
  * Class ConversionRate
  * @package Vulcan\CurrencyConversion\Models
  *
- * @property string Code
- * @property double Dollar
+ * @property string Code The currency code. eg AUD, NZD, USD etc
+ * @property double Dollar The dollar exchange rate. Multiply by this value to achieve the currency conversion required
  */
 class ConversionRate extends DataObject
 {
@@ -20,6 +20,14 @@ class ConversionRate extends DataObject
         'Dollar' => 'Decimal'
     ];
 
+    /**
+     * Add or update
+     *
+     * @param string $code
+     * @param float  $dollarAmount
+     *
+     * @return DataObject|static
+     */
     public static function addOrUpdate($code, $dollarAmount)
     {
         $record = static::get()->filter('Code', $code)->first();
@@ -36,7 +44,9 @@ class ConversionRate extends DataObject
     }
 
     /**
-     * @param $code
+     * Fetch record by code
+     *
+     * @param string $code The currency code. eg AUD, NZD, USD etc
      *
      * @return DataObject|static
      */
@@ -45,5 +55,4 @@ class ConversionRate extends DataObject
         return static::get()->filter('Code', $code)->first();
     }
 }
-
 ?>

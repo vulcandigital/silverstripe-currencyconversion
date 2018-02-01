@@ -4,12 +4,15 @@ namespace Vulcan\CurrencyConversion\Tasks;
 
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Config\Configurable;
 use SilverStripe\CronTask\Interfaces\CronTask;
 use SilverStripe\Dev\BuildTask;
 use Vulcan\CurrencyConversion\CurrencyConversion;
 use Vulcan\CurrencyConversion\Models\ConversionRate;
 
+/**
+ * Class SyncRatesTask
+ * @package Vulcan\CurrencyConversion\Tasks
+ */
 class SyncRatesTask extends BuildTask implements CronTask
 {
     protected $title = 'Sync currency exchange rates';
@@ -59,24 +62,29 @@ class SyncRatesTask extends BuildTask implements CronTask
             throw new \RuntimeException("base_currency $baseCurrency not found in rates");
         }
 
-        ConversionRate::addOrUpdate('USD', 1 / $baseCurrencyRate);
-
         foreach ($rates as $code => $rate) {
             $source = substr($code, 0, 3);
             $target = str_replace($source, '', $code);
 
-            ConversionRate::addOrUpdate($target, $rate / $baseCurrencyRate);
-            $results[$target] = $rate / $baseCurrencyRate;
-            echo sprintf("1 %s = %s %s", $baseCurrency, $results[$target], $target) . ((Director::is_cli()) ? PHP_EOL : '<br/>');
+            $convertedRate = $rate / $baseCurrencyRate;
+
+            if ($code == 'USDUSD') {
+                $target = 'USD';
+            }
+
+            ConversionRate::addOrUpdate($target, $convertedRate);
+            $results[$target] = $convertedRate;
+            echo sprintf("1 %s = %s %s", $baseCurrency, $convertedRate, $target) . ((Director::is_cli()) ? PHP_EOL : '<br/>');
         }
     }
 
     /**
-     * Fines the base currency in the array of rates
-     * @param $rates
-     * @param $baseCurrency
+     * Finds the base currency in the array of rates
      *
-     * @return bool
+     * @param array $rates
+     * @param string $baseCurrency
+     *
+     * @return float|bool
      */
     private function findBaseCurrencyRate($rates, $baseCurrency)
     {
